@@ -1,0 +1,70 @@
+name: OpenST Baker Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      boards:
+        description: 'Boards to build (comma-separated or "all")'
+        required: true
+        default: 'stm32mp157c_dk2'
+        type: string
+
+env:
+  RECIPE_REP: 'diverger/openst-buildroot'
+  RECIPE_REF: 'main'
+  RECIPE_DIR: "."
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [ "${{ inputs.boards }}" = "all" ]; then
+            echo 'matrix=["stm32mp157c_dk2","stm32mp157a_dk1"]' >> $GITHUB_OUTPUT
+          else
+            # Convert comma-separated input to JSON array
+            boards=$(echo "${{ inputs.boards }}" | jq -R -s -c 'split(",") | map(select(length > 0) | gsub("^\\s+|\\s+$"; ""))')
+            echo "matrix=$boards" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        board: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    runs-on: ubuntu-latest-8-cores  # Use larger runner with more CPU/RAM
+    name: Build ${{ matrix.board }}
+    timeout-minutes: 360  # 6 hours max
+
+    steps:
+      - name: Get more disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: Checkout build repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.RECIPE_REP }}
+          ref: ${{ env.RECIPE_REF }}
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
+          path: ${{ env.RECIPE_DIR }}
+          clean: false
+          fetch-depth: 1
+          lfs: true
+
+      - name: Build OpenST Component
+        uses: ./action.yml
+        with:
+          board: ${{ matrix.board }}
+          component: image
+          output-dir: output
