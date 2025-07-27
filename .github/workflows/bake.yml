@@ -1,4 +1,4 @@
-name: OpenSTLinux Build - ${{ inputs.boards }}
+name: OpenSTLinux Build
 
 on:
   workflow_dispatch:
