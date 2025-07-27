@@ -75,7 +75,7 @@ jobs:
           lfs: true
 
       - name: Build OpenST Component
-        uses: ./action.yml
+        uses: ./
         with:
           board: ${{ matrix.board }}
           component: image
