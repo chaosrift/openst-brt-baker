@@ -1,4 +1,4 @@
-name: OpenST Baker Build
+name: OpenSTLinux Build - ${{ inputs.boards }}
 
 on:
   workflow_dispatch:
