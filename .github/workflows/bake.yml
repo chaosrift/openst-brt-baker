@@ -23,7 +23,7 @@ on:
 
 env:
   RECIPE_REP: 'diverger/openst-buildroot'
-  RECIPE_REF: 'main'
+  RECIPE_REF: 'handy'
   RECIPE_DIR: "."
 
 jobs:
