@@ -6,7 +6,7 @@ on:
       boards:
         description: 'Boards to build (comma-separated or "all")'
         required: true
-        default: 'stm32mp157c_dk2'
+        default: 'stm32mp135f_dk'
         type: string
 
       runner:
@@ -35,7 +35,7 @@ jobs:
       - id: set-matrix
         run: |
           if [ "${{ inputs.boards }}" = "all" ]; then
-            echo 'matrix=["stm32mp157c_dk2","stm32mp157a_dk1"]' >> $GITHUB_OUTPUT
+            echo 'matrix=["stm32mp157c_dk2","stm32mp157a_dk1", "stm32mp135f_dk"]' >> $GITHUB_OUTPUT
           else
             # Convert comma-separated input to JSON array
             boards=$(echo "${{ inputs.boards }}" | jq -R -s -c 'split(",") | map(select(length > 0) | gsub("^\\s+|\\s+$"; ""))')
